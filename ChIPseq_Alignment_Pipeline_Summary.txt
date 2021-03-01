@@ -1,0 +1,79 @@
+###########################################################################################################
+######Read alignment/processing for spike-in calibrated ChIP-seq  #########################################
+###########################################################################################################
+
+######Check the quality of fastq files with FASTQC --------------------------------------------------------
+
+mkdir FASTQC/
+
+nohup fastqc *fastq.gz -o FASTQC/ &
+
+cd FASTQC/
+
+multiqc  . -ip
+
+
+######Align RNA-seq reads to the concatenated genomes (mm10+dm6 for NChIP-seq and mm10+hg19 for XChIP-seq)----
+######The example analysis below is shown for NChIP-seq
+
+nohup PairedEnd_Bowtie2_SpikeIn_AlignmentFromList.pl -file align.files.txt -genome mm10 -spikein dm6 &
+
+### align.files.txt has three tab-separated columns: Read1.fastq		Read2.fastq	filename
+
+###### Each column for Read1/2 can have more than one fastq.gz file, for example, when aligning reads from the NextSeq 500/550 Illumina sequencer that outputs reads for each of its four lanes individually
+
+######Calculate factors for spike-in normalisation --------------------------------------------------------
+
+######Count number of reads in aligned bam files to calculate factors for spike-in normalisation
+
+for file in *mm10*bam
+do
+echo $file
+samtools idxstats $file | awk '{s+=$3+$4} END {print s}'
+done
+
+
+for file in *dm6*bam
+do
+echo $file
+samtools idxstats $file | awk '{s+=$3+$4} END {print s}'
+done
+
+######Randomly subsample mm10 ChIP-seq bam files for individual replicates to reflect the total number of dm6 reads in each sample, correcting for the actual  spike-in cell ratio (dm6/mm10 total read counts in corresponding Input samples)
+
+######Note: subsampling is done to generate bam files for the purposes of data visualisation (metaplots, UCSC genome browser) and annotation of genomic regions with read counts
+
+######For how to calculate factors for spike-in normalisation please see Fursova et al., 2019 (PMID: 31029541) and Hu et al., 2015 (PMID: 26130708).
+
+downsample_from_list_sambamba.pl -file mm10.downsample.txt
+
+### mm10.downsample.txt has two tab-separated columns: file.bam	subsampling fraction (<1)
+
+######Check correlation between individual biological replicates ----------------------------------------------
+
+multiBamSummary BED-file --BED RegionsOfInterest.bed --bamfiles [Rep1.bam Rep2.bam ...] -o results.npz
+
+plotCorrelation --corData results.npz --corMethod pearson -p heatmap --removeOutliers --plotNumbers -o correlation_output.pdf --outFileCorMatrix correlation_output_matrix.txt 
+
+###Regions of interest can be ChIP-seq peaks, gene promoters, etc
+
+######If individual replicates are highly correlated (Pearson cor > 0.9), merge them for the downstream analysis and visualisation
+
+######Merge individual replicates ---------------------------------------------------------------------------------
+
+sambamba merge SampleName_mm10_UniqMapped_sorted_rmdup_downsampled_MERGED.bam SampleName_rep1_mm10_UniqMapped_sorted_rmdup_downsampled.bam SampleName_rep2_mm10_UniqMapped_sorted_rmdup_downsampled.bam SampleName_rep3_mm10_UniqMapped_sorted_rmdup_downsampled.bam
+
+#######Generate bigWig files for data visualisation using metaplots/heatmaps or UCSC Genome browser ----------------
+
+for file in *mm10*downsampled_MERGED.bam
+do
+bam2bigwig_MACS2.pl -bam $file -readtype paired -genome mm10 -name $(echo $file | rev | cut -f 2- -d '.' | rev).MACS2
+done
+
+######Count reads in regions of interest (peaks, gene promoters or bodies) ------------------------------------------
+
+######For annotation of genomic regions with read counts, merged bam files of downsampled biological replciates were used
+
+multiBamSummary BED-file --BED peaks.bed --bamfiles file1.bam file2.bam -o peaks.counts.results.npz --outRawCounts peaks.counts.results.txt -l file1 file2 
+
+#######For making metaplots and heatmaps, computeMatrix was used in combination with plotProfile/plotHeatmap per instructions from deepTools web page
