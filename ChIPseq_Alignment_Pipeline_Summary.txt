@@ -13,10 +13,10 @@ cd FASTQC/
 multiqc  . -ip
 
 
-######Align RNA-seq reads to the concatenated genomes (mm10+dm6 for NChIP-seq and mm10+hg19 for XChIP-seq)----
+######Align RNA-seq reads to the concatenated genomes (mm10+dm6 for NChIP-seq or mm10+hg19 for XChIP-seq)----
 ######The example analysis below is shown for NChIP-seq
 
-nohup PairedEnd_Bowtie2_SpikeIn_AlignmentFromList.pl -file align.files.txt -genome mm10 -spikein dm6 &
+nohup ChIPseq_PairedEnd_Bowtie2_SpikeIn_AlignmentFromList.pl -file align.files.txt -genome mm10 -spikein dm6 &
 
 ### align.files.txt has three tab-separated columns: Read1.fastq		Read2.fastq	filename
 
@@ -45,9 +45,9 @@ done
 
 ######For how to calculate factors for spike-in normalisation please see Fursova et al., 2019 (PMID: 31029541) and Hu et al., 2015 (PMID: 26130708).
 
-downsample_from_list_sambamba.pl -file mm10.downsample.txt
+ChIPseq_Downsample_FromList.pl -file mm10.downsample.txt
 
-### mm10.downsample.txt has two tab-separated columns: file.bam	subsampling fraction (<1)
+### mm10.downsample.txt has two tab-separated columns: file.bam	subsampling_fraction (< 1)
 
 ######Check correlation between individual biological replicates ----------------------------------------------
 
@@ -67,7 +67,7 @@ sambamba merge SampleName_mm10_UniqMapped_sorted_rmdup_downsampled_MERGED.bam Sa
 
 for file in *mm10*downsampled_MERGED.bam
 do
-bam2bigwig_MACS2.pl -bam $file -readtype paired -genome mm10 -name $(echo $file | rev | cut -f 2- -d '.' | rev).MACS2
+ChIPseq_bam2bigwig_MACS2.pl -bam $file -readtype paired -genome mm10 -name $(echo $file | rev | cut -f 2- -d '.' | rev).MACS2
 done
 
 ######Count reads in regions of interest (peaks, gene promoters or bodies) ------------------------------------------
@@ -75,5 +75,7 @@ done
 ######For annotation of genomic regions with read counts, merged bam files of downsampled biological replciates were used
 
 multiBamSummary BED-file --BED peaks.bed --bamfiles file1.bam file2.bam -o peaks.counts.results.npz --outRawCounts peaks.counts.results.txt -l file1 file2 
+
+#######To load the output of multiBamSummary into R, remove "#" from the first line of the peaks.counts.results.txt file
 
 #######For making metaplots and heatmaps, computeMatrix was used in combination with plotProfile/plotHeatmap per instructions from deepTools web page
