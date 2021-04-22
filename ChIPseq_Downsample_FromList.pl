@@ -3,7 +3,7 @@ use Getopt::Long;
 use Pod::Usage;
 use strict;
 
-pod2usage("\nDownsamples a list of bam files. Requires a list with two tab-separated fields: filename	fraction. Filename should be a full file name and contain _mapped_sorted_rmdup.bam.\nDesigned to be used with alignment_from_list.pl workflow.") if (($#ARGV<0) && (-t STDIN));
+pod2usage("\nDownsamples a list of bam files. Requires a list with two tab-separated fields: filename	fraction. Filename should be a full file name.\nDesigned to be used with alignment_from_list.pl workflow.") if (($#ARGV<0) && (-t STDIN));
 
 
 &GetOptions ("file=s"=> \my $file,
