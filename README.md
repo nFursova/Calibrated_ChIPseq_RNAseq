@@ -1,6 +1,6 @@
 # Calibrated-ChIPseq-RNAseq-tools
 
-Scripts developed in Klose Lab to perform analysis of spike-in calibrated ChIP-seq and RNA-seq data. Contributed by Dr Hamish King (h.king@qmul.ac.uk, drhamishking@gmail.com), Dr Nadezda Fursova (nadya.fursova@nih.gov, nfursova.msu@gmail.com), and Dr Anne Turberfield. Used for the data analysis in the manuscript "BAP1 constrains pervasive H2AK119ub1 to control the transcriptional potential of the genome".
+Scripts developed in Klose Lab to perform analysis of spike-in calibrated ChIP-seq and RNA-seq data. Contributed by Dr Hamish King (h.king@qmul.ac.uk, drhamishking@gmail.com), Dr Nadezda Fursova (nfursova.msu@gmail.com), and Dr Anne Turberfield. Used for the data analysis in the manuscript "BAP1 constrains pervasive H2AK119ub1 to control the transcriptional potential of the genome".
 
 Please contact nfursova.msu@gmail.com with questions or problems.
 
