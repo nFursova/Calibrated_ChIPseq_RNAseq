@@ -9,11 +9,10 @@ require('reshape2')
 require('RColorBrewer')
 library('ggExtra')
 library('purrr')
-library('apeglm')
 
 ##DESeq2 function:
 
-#####Function arguments:
+#####Arguments: required to properly read in the files with file names and column names specified in the correct format
 
 print(rnaseq_app) #rnaseq_app: Total or Nuc RNAseq approach
 
