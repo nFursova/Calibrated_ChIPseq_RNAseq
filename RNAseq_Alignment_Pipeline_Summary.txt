@@ -15,11 +15,11 @@ multiqc  . -ip
 
 ######Align RNA-seq reads to the concatenated mm10+dm6 genomes --------------------------------------------
 
-nohup RNAseq_PairedEnd.SpikeIn_AlignmentFromList_new.pl -file RNAseq.align.files.txt -genome mm10 -spikein dm6 &
+nohup RNAseq_PairedEnd_SpikeIn_AlignmentFromList.pl -file RNAseq.align.files.txt -genome mm10 -spikein dm6 &
 
 ######Align reads for corresponding gDNA-seq files to the concatenated mm10+dm6 genomes
 
-nohup PairedEnd_Bowtie2_SpikeIn_AlignmentFromList_new.pl -file gDNAseq.align.files.txt -genome mm10 -spikein dm6 &
+nohup ChIPseq_PairedEnd_Bowtie2_SpikeIn_AlignmentFromList.pl -file gDNAseq.align.files.txt -genome mm10 -spikein dm6 &
 
 ######Note:
 ###### align.files.txt has three tab-separated columns: 
@@ -50,7 +50,7 @@ done
 
 ######For how to calculate factors for spike-in normalisation please see Fursova et al., 2019 (PMID: 31029541) and Hu et al., 2015 (PMID: 26130708).
 
-downsample_from_list_sambamba.pl -file mm10.downsample.txt
+ChIPseq_RNAseq_Downsample_BamFile_FromList.pl -file mm10.downsample.txt
 
 ###### mm10.downsample.txt has two tab-separated columns: 
 ###### file.bam 	subsampling fraction (<1)
@@ -69,12 +69,12 @@ plotCorrelation --corData results.npz --corMethod pearson -p heatmap --removeOut
 
 sambamba merge SampleName_mm10_mapped_sorted_rmdup_downsampled_MERGED.bam SampleName_rep1_mm10_mapped_sorted_rmdup_downsampled.bam SampleName_rep2_mm10_mapped_sorted_rmdup_downsampled.bam SampleName_rep3_mm10_mapped_sorted_rmdup_downsampled.bam
 
-#######Generate strand-specific bigWig files for data visualisation using metaplots or UCSC Genome browser ------
+#######Generate strand-specific bigwig files for data visualisation using metaplots or UCSC Genome browser ------
 
 for file in *mm10_mapped_sorted_rmdup_downsampled_MERGED.bam
 do
 echo $file
-pairedend_splitStrand.pl -bam $file -genome mm10
+RNAseq_PairedEnd_Split_Strand_Bigwig.pl -bam $file -genome mm10
 done
 
 ######For UCSC Track Hub upload, convert REVERSE.bw to be displayed below the Forward.bw by multiplying all values by -1.
@@ -91,22 +91,22 @@ rm SampleName.MinusStrand.wig
 
 ######1. Count reads from raw mm10 bam files (before spike-in normalisation) for a non-redundant set of mm10 refGene genes.
 
-nohup GFF_PairedEndRNA.ReadCount.pl -file ListFileForReadCount.txt -gff mm10_NonRedundantRefGene_GeneBody.gff -genome mm10 -rpkm FALSE &
+nohup RNAseq_GFF_PairedEnd_RNA_Read_Count.pl -file ListFileForReadCount.txt -gff mm10_NonRedundantRefGene_GeneBody.gff -genome mm10 -rpkm FALSE &
 
 ######2. Count reads in pre-normalised dm6 bam files for DESeq2 analysis
 
 ######2a: Pre-normalise dm6 bam files to reflect the actual spike-in cell ratio (dm6/mm10 ratio in gDNA-seq Input)
 
-subsample_bam_list_SpikeInInput.pl -file dm6.normalise.txt
+ChIPseq_RNAseq_Subsample_BamFile_List_SpikeInInput.pl -file dm6.normalise.txt
 
 ###### dm6.normalise.txt has two tab-separated columns: 
-###### file.bam 	subsampling ratio (<1)
+###### file.bam 	subsampling ratio ( < 1)
 
 ######To obtain spike-in normalisation for dm6 bam files, for each sample calculate the dm6/mm10 ratio in the corresponding gDNA-seq Input file and then normalise to the lowest ratio which should be set to ~ 1. 
 
 ######2b: Count reads from spike-in pre-normalised dm6 bam files for a set of dm6 refGene genes.
 
-nohup GFF_PairedEndRNA.ReadCount.pl -file ListFileForReadCount.txt -gff dm6.refGene.GeneBody.gff -genome dm6 -rpkm FALSE &
+nohup RNAseq_GFF_PairedEnd_RNA_Read_Count.pl -file ListFileForReadCount.txt -gff dm6.refGene.GeneBody.gff -genome dm6 -rpkm FALSE &
 
 ####ListFileForReadCount.txt has two tab-separated columns
 #### file.bam	SampleName
@@ -117,7 +117,7 @@ GFF2table.pl -gff ReadCounts.gff
 
 ######Run DESeq2 analysis scripts in R -----------------------------------------------------------------------------------------
 
-######DESeq2.RNAseq.Analysis.Example.Script.R that uses DESeq2.RNAseq.IndividualCellLines.Generic.R
+######DESeq2.RNAseq.Analysis.Example.Script.R that uses RNAseq_DESeq2.R
 
 
 
