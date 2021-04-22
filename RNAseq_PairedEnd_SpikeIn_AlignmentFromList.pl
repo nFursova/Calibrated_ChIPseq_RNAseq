@@ -16,6 +16,7 @@ my $outfile = "AlignmentStatistics.txt";
 open(IN, $file) or die "Could not open $file";
 open(OUT, ">$outfile") or die "Could not open $outfile";
 
+#Specify location of the RNAseq_PairedEnd_SpikeIn_Alignment.pl script if not in PATH
 
 while(<IN>){
             chomp;
