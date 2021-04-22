@@ -3,7 +3,7 @@ use Getopt::Long;
 use Pod::Usage;
 use strict;
 
-pod2usage("\nSplits paired-end RNA seq file into strand-specific files.\nUsage: -bam <BAM file> -genome <eg. mm10>\n") if (($#ARGV<0) && (-t STDIN));
+pod2usage("\nSplits paired-end RNA seq file into strand-specific files and generates bigwigs.\nUsage: -bam <BAM file> -genome <eg. mm10>\n") if (($#ARGV<0) && (-t STDIN));
 
 
 &GetOptions ("bam=s"=> \my $file,
@@ -29,6 +29,8 @@ pod2usage("\nSplits paired-end RNA seq file into strand-specific files.\nUsage: 
 
 `sambamba index -t 56 $name\_FORWARD.bam`;
 `sambamba index -t 56 $name\_REVERSE.bam`;
+
+#Specify location of the chromosome size file
 
 `genomeCoverageBed -bga -split -ibam $name.bam -g /databank/chrom.sizes/$genome.chrom.sizes.txt | wigToBigWig stdin /databank/chrom.sizes/$genome.chrom.sizes.txt $name.bw`;
 `genomeCoverageBed -bga -split -ibam $name\_FORWARD.bam -g /databank/chrom.sizes/$genome.chrom.sizes.txt | wigToBigWig stdin /databank/chrom.sizes/$genome.chrom.sizes.txt $name\_FORWARD.bw`;
