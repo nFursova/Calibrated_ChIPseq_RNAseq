@@ -14,10 +14,7 @@ pod2usage("$0: usage is : -fastq1 <FASTQ file> -fastq2 <FASTQ file> -genome  <eg
 #align fastq file with bowtie2
 `bowtie2 -p 20 --no-mixed --no-discordant -x /databank/bowtie2/$genome/$genome -1 $fastq1 -2 $fastq2 | grep -v XS: - | samtools view -bhS -F4 - > $filename\_mapped.bam`;
 
-#for multiply mapping reads
-#`bowtie2 -p 20 --no-mixed --no-discordant -x /databank/bowtie2/$genome/$genome -1 $fastq1 -2 $fastq2 | samtools view -bhS -F4 - > $filename\_mapped.bam`;
-
-##NORMAL ALIGNMENT 
+##Sort and remove duplicates 
 `samtools sort $filename\_mapped.bam > $filename\_mapped_sorted.bam`;                                     
 `samtools rmdup $filename\_mapped_sorted.bam $filename\_mapped_sorted_rmdup.bam`;                   
 
@@ -28,11 +25,7 @@ pod2usage("$0: usage is : -fastq1 <FASTQ file> -fastq2 <FASTQ file> -genome  <eg
 
 `rm $filename\_mapped.bam`;
 `rm $filename\_mapped_sorted.bam`;
-#`rm $filename\_mapped_sorted_rmdup.bam`;
-
-#my $count = `samtools view -c $filename\_mapped_sorted_rmdup_filtered.bam`;
-#    print "\n";
-#    print "Final read count is $count\n"; 
+`rm $filename\_mapped_sorted_rmdup.bam`;
 
 
 exit;
