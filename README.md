@@ -2,7 +2,7 @@
 
 Scripts developed in Klose Lab to perform analysis of spike-in calibrated ChIP-seq and RNA-seq data. Contributed by Dr Hamish King (h.king@qmul.ac.uk, drhamishking@gmail.com), Dr Nadezda Fursova (nadya.fursova@nih.gov, nfursova.msu@gmail.com), and Dr Anne Turberfield. Used for the data analysis in the manuscript "BAP1 constrains pervasive H2AK119ub1 to control the transcriptional potential of the genome".
 
-Please contact nadya.fursova@nih.gov or nfursova.msu@gmail.com with questions or problems.
+Please contact nfursova.msu@gmail.com with questions or problems.
 
 Requirements for each script are listed individually, but most scripts rely on the use of basic read aligment and processing tools:
 
