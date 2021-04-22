@@ -3,7 +3,7 @@ use Getopt::Long;
 use Pod::Usage;
 use strict;
 
-pod2usage("\nNormalises list of bam files by dm6/mm10 ratio in Input. Requires a list with two tab-separated fields: filename	fraction.  \nUsage: -file <Tab separated file with filenames and downsample fraction>>\n") if (($#ARGV<0) && (-t STDIN));
+pod2usage("\nNormalises list of bam files by dm6/mm10 ratio in Input. Requires a file containing a list with two tab-separated fields: filename	fraction.  \nUsage: -file <Tab separated file with filenames and downsample fraction>>\n") if (($#ARGV<0) && (-t STDIN));
 
 
 &GetOptions ("file=s"=> \my $file,
@@ -28,7 +28,7 @@ while(<IN>){
 
 my $count = `sambamba view -c -t 56 $name\_normalisedSpikeInInput.bam`;
 print "\n";
-print "Read Count after downsampling is $count\n";
+print "Read Count after subsampling is $count\n";
 
 }
 
