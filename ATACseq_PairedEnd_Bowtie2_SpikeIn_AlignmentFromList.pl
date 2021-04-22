@@ -12,11 +12,13 @@ pod2usage("\nPerforms alignment pipeline on list of paired-end fastq files. \nUs
 
 open(IN, $file) or die "Could not open $file";
 
+#Specify location of the ATACseq_PairedEnd_Bowtie2_SpikeIn_Alignment.pl script if not in PATH
+
 while(<IN>){
             chomp;
             my ($fastq1,$fastq2,$name)=split (/\t/,);
             print "$name\n";
-            my $command = `atac_alignment_new.pl -fastq1 $fastq1 -fastq2 $fastq2 -genome $genome -name $name`;
+            my $command = `ATACseq_PairedEnd_Bowtie2_SpikeIn_Alignment.pl -fastq1 $fastq1 -fastq2 $fastq2 -genome $genome -name $name`;
 
 my $count = `samtools view -c $name\_mapped_sorted_rmdup_filtered.bam`;
 
