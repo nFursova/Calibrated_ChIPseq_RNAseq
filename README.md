@@ -22,7 +22,7 @@ Scripts performed on a list of files require the input in tab-limited format as 
 
 file.bam	SampleName
 
-# Summary of the read alignment and processing pipelines for calibrated RNA-seq and ChIP-seq
+# Summary of the read alignment and processing pipelines for calibrated ChIP-seq and RNA-seq
 RNAseq_Alignment_Pipeline_Summary.txt
 
 ChIPseq_Alignment_Pipeline_Summary.txt
