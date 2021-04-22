@@ -1,5 +1,5 @@
 #################################################################################################################################################################
-###################Running DESeq2 to compare ChIP enrichment in one cell line in two condtions (UNT and TAM) for 3 biological reps###########################################
+###################Running DESeq2 to compare ChIP enrichment in one cell line in two condtions (UNT and TAM) for 3 biological reps###############################
 #################################################################################################################################################################
 
 ####Load required packages
@@ -18,9 +18,9 @@ library('grid')
 library('apeglm')
 
 
-####To use it with the counts produced in multiBamSummary, I first have to get rid of # on the first line
+####To use it with the counts produced in multiBamSummary, first get rid of "#" on the first line
 
-####Function's arguements
+####Arguments: required to correctly read in files with file names and column names specified in the correct format
 
 print(CellLine) #Name of Cell Line
 print(chip) # Type of ChIP-seq - XChIPseq or NChIPSeq
@@ -92,7 +92,7 @@ deseq=function(CellLine, chip, line_factor, intervals, spikein_norm, cutoff){
   
   exp.SampleInfo=data.frame(condition = exp.Condition, rep = exp.Rep)
   
-  rownames(exp.SampleInfo)<-colnames(exp)
+  rownames(exp.SampleInfo) <- colnames(exp)
   
   exp.SampleInfo$condition = factor(exp.SampleInfo$condition, levels = c('UNT', 'TAM'))
   
