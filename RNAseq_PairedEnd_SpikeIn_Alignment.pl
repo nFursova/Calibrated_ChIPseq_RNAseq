@@ -38,14 +38,15 @@ print "Now aligning with bowtie2\n";
          `sambamba sort -t 56 -m 75000000000 $filename\_Bowtie2mapped.bam -o $filename\_Bowtie2mapped_sorted.bam`;
 print "Finished bowtie2 alignment\n";
 
-
+##Merge reads aligned with STAR and bowtie2, sort and remove duplicates
 
 `sambamba merge -t 56  $filename\_mapped.bam $filename\_Bowtie2mapped_sorted.bam $filename\_STARmapped_sorted.bam`;
 
 `sambamba sort -t 56 -m 75000000000 $filename\_mapped.bam -o $filename\_mapped_sorted.bam`;
 `sambamba markdup -r -t 56 $filename\_mapped_sorted.bam $filename\_mapped_sorted_rmdup.bam`;
 
-#
+
+##Extract reads aligning to the mouse and spike-in genomes
 
 	print "\nExtracting reads aligning uniquely to $genome.\n";
 `samtools view -@ 56 -h $filename\_mapped_sorted_rmdup.bam | grep -v $spikegenome | sed s/$genome\_chr/chr/g | samtools view -@ 56 -bhS - > $filename\_$genome\_mapped_sorted_rmdup.bam`;
@@ -53,7 +54,7 @@ print "Finished bowtie2 alignment\n";
 `samtools view -@ 56 -h $filename\_mapped_sorted_rmdup.bam | grep -v $genome | sed s/$spikegenome\_chr/chr/g | samtools view -@ 56 -bhS - > $filename\_$spikegenome\_mapped_sorted_rmdup.bam`;
 
 
-#indexing bam files
+#Indexing bam files
 
 `sambamba index -t 56 $filename\_mapped_sorted_rmdup.bam`;
 `sambamba index -t 56 $filename\_$genome\_mapped_sorted_rmdup.bam`;
