@@ -45,7 +45,7 @@ done
 
 ######For how to calculate factors for spike-in normalisation please see Fursova et al., 2019 (PMID: 31029541) and Hu et al., 2015 (PMID: 26130708).
 
-ChIPseq_Downsample_FromList.pl -file mm10.downsample.txt
+ChIPseq_RNAseq_Downsample_BamFile_FromList.pl -file mm10.downsample.txt
 
 ### mm10.downsample.txt has two tab-separated columns: file.bam	subsampling_fraction (< 1)
 
