@@ -45,11 +45,6 @@ print "Finished bowtie2 alignment\n";
 `sambamba sort -t 56 -m 75000000000 $filename\_mapped.bam -o $filename\_mapped_sorted.bam`;
 `sambamba markdup -r -t 56 $filename\_mapped_sorted.bam $filename\_mapped_sorted_rmdup.bam`;
 
-
-
-#my $count = `sambamba view -c -t 60 $filename\_mapped_sorted_rmdup.bam`;
-
-#print "\tNumber of total uniquely aligning reads is $count";
 #
 
 	print "\nExtracting reads aligning uniquely to $genome.\n";
@@ -64,25 +59,6 @@ print "Finished bowtie2 alignment\n";
 `sambamba index -t 56 $filename\_$genome\_mapped_sorted_rmdup.bam`;
 `sambamba index -t 56 $filename\_$spikegenome\_mapped_sorted_rmdup.bam`;
 
-my $spikegenomecount = `sambamba view -t 56 -c $filename\_$spikegenome\_mapped_sorted_rmdup.bam`;
-
-my $normalisationfactor = 1/($spikegenomecount/1000000);
-
-
-`bamCoverage -b $filename\_$genome\_mapped_sorted_rmdup.bam -o $filename\_$genome.FORWARD.Normalised.bw -of bigwig --scaleFactor $normalisationfactor --filterRNAstrand forward --binSize 10`;
-
-`bamCoverage -b $filename\_$genome\_mapped_sorted_rmdup.bam -o $filename\_$genome.REVERSE.Normalised.bw -of bigwig --scaleFactor $normalisationfactor --filterRNAstrand reverse --binSize 10`;
-
-
-`bamCoverage -b $filename\_$spikegenome\_mapped_sorted_rmdup.bam -o $filename\_$spikegenome.FORWARD.Normalised.bw -of bigwig --scaleFactor $normalisationfactor --filterRNAstrand forward --binSize 10`;
-
-`bamCoverage -b $filename\_$spikegenome\_mapped_sorted_rmdup.bam -o $filename\_$spikegenome.REVERSE.Normalised.bw -of bigwig --scaleFactor $normalisationfactor --filterRNAstrand reverse --binSize 10`;
-
-#`genomeCoverageBed -split -scale $normalisationfactor -bga -ibam $filename\_$genome\_mapped_sorted_rmdup.bam -g /databank/chrom.sizes/$genome.chrom.sizes.txt | wigToBigWig stdin /databank/chrom.sizes/$genome.chrom.sizes.txt $filename\_$genome.Normalised.bw`;
-
-#`genomeCoverageBed -split -scale $normalisationfactor -bga -ibam $filename\_$spikegenome\_mapped_sorted_rmdup.bam -g /databank/chrom.sizes/$spikegenome.chrom.sizes.txt | wigToBigWig stdin /databank/chrom.sizes/$spikegenome.chrom.sizes.txt $filename\_$spikegenome.Normalised.bw`;
-
-
 
 `rm $filename\_1.fastq`;
 `rm $filename\_2.fastq`;
@@ -91,6 +67,13 @@ my $normalisationfactor = 1/($spikegenomecount/1000000);
 `rm $filename\\Unmapped.out.mate2`;
 `rm $filename\\Log.progress.out`;
 `rm $filename\SJ.out.tab`;
+
+
+`rm $filename\_Bowtie2mapped.bam`;
+`rm $filename\_Bowtie2mapped_sorted.bam`;
+
+`rm $filename\_STARmapped.bam`;
+`rm $filename\_STARmapped_sorted.bam`;
 
 `rm $filename\_mapped.bam`;
 `rm $filename\_mapped_sorted.bam`;
