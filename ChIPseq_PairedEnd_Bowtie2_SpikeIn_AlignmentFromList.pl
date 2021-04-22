@@ -13,11 +13,13 @@ pod2usage("\nPerforms alignment pipeline on a list of paired-end fastq files. \n
 
 open(IN, $file) or die "Could not open $file";
 
+#Specify location of the ChIPseq_PairedEnd_Bowtie2_SpikeIn_Alignment.pl script if not in PATH
+
 while(<IN>){
             chomp;
             my ($fastq1,$fastq2,$name)=split (/\t/,);
             print "$name\n";
-            my $command = `PairedEnd_Bowtie2_SpikeIn_Alignment_new.pl -fastq1 $fastq1 -fastq2 $fastq2 -genome $genome -spikein $spikegenome -name $name`;
+            my $command = `ChIPseq_PairedEnd_Bowtie2_SpikeIn_Alignment.pl -fastq1 $fastq1 -fastq2 $fastq2 -genome $genome -spikein $spikegenome -name $name`;
 
 #indexing bam files
 
