@@ -18,7 +18,7 @@ nohup ChIPseq_PairedEnd_Bowtie2_SpikeIn_AlignmentFromList.pl -file align.files.t
 
 ### align.files.txt has three tab-separated columns: Read1.fastq  Read2.fastq filename
 
-###### Each column for Read1/2 can have more than one fastq.gz file, for example, when aligning reads from the NextSeq 500/550 Illumina sequencer that outputs reads for each lane individually
+###### Each column for Read1/2 can have more than one fastq.gz file, for example, when aligning reads from the NextSeq 500/550 Illumina sequencer that outputs reads for each lane separately
 
 ######Calculate factors for spike-in normalisation --------------------------------------------------------
 
