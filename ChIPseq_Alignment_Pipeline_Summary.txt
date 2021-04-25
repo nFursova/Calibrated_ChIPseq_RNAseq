@@ -8,7 +8,7 @@ fastqc *fastq.gz
 
 multiqc  . -ip
 
-######Align reads to the concatenated genomes (mm10+dm6 for NChIP-seq or mm10+hg19 for XChIP-seq)----------
+######Align ChIP-seq reads to the concatenated genome (mm10+dm6 for NChIP-seq or mm10+hg19 for XChIP-seq)--
 ######To make concatenated genomes, chromosome names were changed to mm10_chr*, dm6_chr*, hg19_chr*--------
 ######to extract reads mapping to individual genomes after alignment---------------------------------------
 
