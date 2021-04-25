@@ -4,46 +4,29 @@
 
 ######Check the quality of fastq files with FASTQC --------------------------------------------------------
 
-mkdir FASTQC/
-
-nohup fastqc *fastq.gz -o FASTQC/ &
-
-cd FASTQC/
+fastqc *fastq.gz 
 
 multiqc  . -ip
 
+######Align reads to the concatenated genomes (mm10+dm6 for NChIP-seq or mm10+hg19 for XChIP-seq)----------
+######To make concatenated genomes, chromosome names were changed to mm10_chr*, dm6_chr*, hg19_chr*--------
+######to extract reads mapping to individual genomes after alignment---------------------------------------
 
-######Align RNA-seq reads to the concatenated genomes (mm10+dm6 for NChIP-seq or mm10+hg19 for XChIP-seq)----
-######The example analysis below is shown for NChIP-seq
+######The example analysis shown below is for NChIP-seq
 
 nohup ChIPseq_PairedEnd_Bowtie2_SpikeIn_AlignmentFromList.pl -file align.files.txt -genome mm10 -spikein dm6 &
 
-### align.files.txt has three tab-separated columns: Read1.fastq		Read2.fastq	filename
+### align.files.txt has three tab-separated columns: Read1.fastq  Read2.fastq filename
 
-###### Each column for Read1/2 can have more than one fastq.gz file, for example, when aligning reads from the NextSeq 500/550 Illumina sequencer that outputs reads for each of its four lanes individually
+###### Each column for Read1/2 can have more than one fastq.gz file, for example, when aligning reads from the NextSeq 500/550 Illumina sequencer that outputs reads for each lane individually
 
 ######Calculate factors for spike-in normalisation --------------------------------------------------------
 
-######Count number of reads in aligned bam files to calculate factors for spike-in normalisation
-
-for file in *mm10*bam
-do
-echo $file
-samtools idxstats $file | awk '{s+=$3+$4} END {print s}'
-done
-
-
-for file in *dm6*bam
-do
-echo $file
-samtools idxstats $file | awk '{s+=$3+$4} END {print s}'
-done
+######For how to calculate factors for spike-in normalisation please see Fursova et al., 2019 (PMID: 31029541) and Hu et al., 2015 (PMID: 26130708).
 
 ######Randomly subsample mm10 ChIP-seq bam files for individual replicates to reflect the total number of dm6 reads in each sample, correcting for the actual  spike-in cell ratio (dm6/mm10 total read counts in corresponding Input samples)
 
 ######Note: subsampling is done to generate bam files for the purposes of data visualisation (metaplots, UCSC genome browser) and annotation of genomic regions with read counts
-
-######For how to calculate factors for spike-in normalisation please see Fursova et al., 2019 (PMID: 31029541) and Hu et al., 2015 (PMID: 26130708).
 
 ChIPseq_RNAseq_Downsample_BamFile_FromList.pl -file mm10.downsample.txt
 
@@ -63,7 +46,7 @@ plotCorrelation --corData results.npz --corMethod pearson -p heatmap --removeOut
 
 sambamba merge SampleName_mm10_UniqMapped_sorted_rmdup_downsampled_MERGED.bam SampleName_rep1_mm10_UniqMapped_sorted_rmdup_downsampled.bam SampleName_rep2_mm10_UniqMapped_sorted_rmdup_downsampled.bam SampleName_rep3_mm10_UniqMapped_sorted_rmdup_downsampled.bam
 
-#######Generate bigWig files for data visualisation using metaplots/heatmaps or UCSC Genome browser ----------------
+#######Generate bigWig files for data visualisation (metaplots/heatmaps or UCSC Genome browser) --------------------
 
 for file in *mm10*downsampled_MERGED.bam
 do
@@ -72,7 +55,7 @@ done
 
 ######Count reads in regions of interest (peaks, gene promoters or bodies) ------------------------------------------
 
-######For annotation of genomic regions with read counts, merged bam files of downsampled biological replciates were used
+######For annotation of genomic regions with read counts, merged bam files of downsampled biological replicates were used
 
 multiBamSummary BED-file --BED peaks.bed --bamfiles file1.bam file2.bam -o peaks.counts.results.npz --outRawCounts peaks.counts.results.txt -l file1 file2 
 
