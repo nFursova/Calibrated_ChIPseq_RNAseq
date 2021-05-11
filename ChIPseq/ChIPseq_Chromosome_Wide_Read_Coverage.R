@@ -1,5 +1,7 @@
 #!/usr/bin/Rscript
 
+# Adapted from the script originally written by Dr Michal Gdula
+
 require('GenomicRanges')
 require('Rsamtools')
 require('GenomicAlignments')
