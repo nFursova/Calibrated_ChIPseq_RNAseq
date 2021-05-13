@@ -85,14 +85,14 @@ chromosome_density=function(x,y,z){
           legend.key.size = unit(1.5, "lines"), legend.text = element_text(size=15), 
           panel.grid.major=element_blank(),panel.grid.minor=element_blank(), panel.border=element_blank())+
     scale_x_continuous(expand = c(0,0), name=y, 
-                       limits=c(0, length(UNT[which(seqnames(UNT)==y)])*250000), 
+                       limits=c(0, length(UNT[which(seqnames(UNT)==y)])*250000+1), 
                        breaks=seq(0, length(UNT[which(seqnames(UNT)==y)])*250000, by = 25000000), 
                        labels=paste0(seq(0, length(UNT[which(seqnames(UNT)==y)])*250000, by = 25000000)/1000000, ' Mb'))+
-    scale_y_continuous(expand = c(0,0), name='Read Density', limits=c(0, ymax), breaks = seq(0,ymax, by = 5))+
+    scale_y_continuous(expand = c(0,0), name='Read Density', limits=c(0, ymax), breaks = seq(0, ymax, by = 5))+
     scale_fill_manual(values=c('#ed2224', '#29286b'), labels=c('TAM', 'UNT'))+
     scale_alpha_manual(values = c(1, 1), guide='none')+
     ggtitle(paste0(z, ' in ', x))+
-    geom_area(position='identity', alpha = 1)
+    geom_area(position='identity')
   plot(p)
   
   dev.off()
