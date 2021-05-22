@@ -27,3 +27,14 @@ file.bam	SampleName
 RNAseq_Alignment_Pipeline_Summary.txt
 
 ChIPseq_Alignment_Pipeline_Summary.txt
+
+# ChIP-seq
+
+# RNA-seq
+
+## bed2gff.pl
+
+Used to annotate BED3 or BED4 file using annotatePeaks.pl from HOMER and convert it to a 9 column .gff file.
+
+
+
