@@ -56,6 +56,10 @@ Used to annotate BED3 or BED4 file using annotatePeaks.pl from HOMER and convert
 
 Used to count number of reads over the bodies of genes specified in the .gff file generated with bed2gff.pl
 
+## GFF2table.pl
+
+Used to convert a 9 column .gff file into a tab-delimited table for the subsequent analysis in R.
+
 ## RNAseq_DESeq2.R
 
 Used to perform differential gene expression analysis by incorporating spike-in based normalisation into DESeq2.
