@@ -3,11 +3,9 @@ use Getopt::Long;
 use Pod::Usage;
 use strict;
 
-pod2usage("\nSplits paired-end RNA seq file into strand-specific files and generates bigwigs.\nUsage: -bam <BAM file> -genome <eg. mm10>\n") if (($#ARGV<0) && (-t STDIN));
-
+pod2usage("\nSplits paired-end RNA seq file into strand-specific files and generates bigwigs. \nRequires samtools, sambamba, bedtools, and wigToBigWig from UCSC in PATH. \nUsage: -bam <BAM file> \n") if (($#ARGV<0) && (-t STDIN));
 
 &GetOptions ("bam=s"=> \my $file,
-	"genome=s"=> \my $genome,
              );
 
 
@@ -30,11 +28,11 @@ pod2usage("\nSplits paired-end RNA seq file into strand-specific files and gener
 `sambamba index -t 56 $name\_FORWARD.bam`;
 `sambamba index -t 56 $name\_REVERSE.bam`;
 
-#Specify location of the chromosome size file
+#Specify location of YOUR LOCAL chromosome size file that can be downloaded from https://hgdownload-test.gi.ucsc.edu/goldenPath/$YOUR_GENOME_OF_INTEREST/biZips/.
 
-`genomeCoverageBed -bga -split -ibam $name.bam -g /databank/chrom.sizes/$genome.chrom.sizes.txt | wigToBigWig stdin /databank/chrom.sizes/$genome.chrom.sizes.txt $name.bw`;
-`genomeCoverageBed -bga -split -ibam $name\_FORWARD.bam -g /databank/chrom.sizes/$genome.chrom.sizes.txt | wigToBigWig stdin /databank/chrom.sizes/$genome.chrom.sizes.txt $name\_FORWARD.bw`;
-`genomeCoverageBed -bga -split -ibam $name\_REVERSE.bam -g /databank/chrom.sizes/$genome.chrom.sizes.txt | wigToBigWig stdin /databank/chrom.sizes/$genome.chrom.sizes.txt $name\_REVERSE.bw`;
+`genomeCoverageBed -bga -split -ibam $name.bam -g chrom.sizes.txt | wigToBigWig stdin chrom.sizes.txt $name.bw`;
+`genomeCoverageBed -bga -split -ibam $name\_FORWARD.bam -g chrom.sizes.txt | wigToBigWig stdin chrom.sizes.txt $name\_FORWARD.bw`;
+`genomeCoverageBed -bga -split -ibam $name\_REVERSE.bam -g chrom.sizes.txt | wigToBigWig stdin chrom.sizes.txt $name\_REVERSE.bw`;
 
 `rm $name\_83.bam`;
 `rm $name\_163.bam`;
