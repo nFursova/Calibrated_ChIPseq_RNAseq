@@ -28,7 +28,7 @@ pod2usage("\nSplits paired-end RNA seq file into strand-specific files and gener
 `sambamba index -t 56 $name\_FORWARD.bam`;
 `sambamba index -t 56 $name\_REVERSE.bam`;
 
-#Specify location of YOUR LOCAL chromosome size file that can be downloaded from https://hgdownload-test.gi.ucsc.edu/goldenPath/$YOUR_GENOME_OF_INTEREST/biZips/.
+#Specify location of YOUR LOCAL chromosome size file that can be downloaded from https://hgdownload-test.gi.ucsc.edu/goldenPath/$YOUR_GENOME_OF_INTEREST/bigZips/
 
 `genomeCoverageBed -bga -split -ibam $name.bam -g chrom.sizes.txt | wigToBigWig stdin chrom.sizes.txt $name.bw`;
 `genomeCoverageBed -bga -split -ibam $name\_FORWARD.bam -g chrom.sizes.txt | wigToBigWig stdin chrom.sizes.txt $name\_FORWARD.bw`;
