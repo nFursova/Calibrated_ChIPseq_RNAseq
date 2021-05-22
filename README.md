@@ -32,9 +32,30 @@ ChIPseq_Alignment_Pipeline_Summary.txt
 
 # RNA-seq
 
+## RNAseq_PairedEnd_SpikeIn_Alignment.pl
+
+Used to align paired-end reads against the concatenated genome (spike-in plus the genome of interest) for one sample. Produces two separate sorted and indexed bam files, with PCR duplicates removed, for the experimental and spike-in genomes.
+
+## RNAseq_PairedEnd_SpikeIn_AlignmentFromList.pl
+
+Used to align paired-end reads against the concatenated genome (spike-in plus the genome of interest) for a list of fastq files. Internally calls  RNAseq_PairedEnd_SpikeIn_Alignment.pl. 
+
+## ChIPseq_RNAseq_Downsample_BamFile_FromList.pl
+
+Used to subsample a certain fraction of reads for a list of bam files, with subsampling fractions calculated based on the spike-in read normalisation as described in Fursova et al., 2019.
+
+## RNAseq_PairedEnd_Split_Strand_Bigwig.pl
+
+Used to split bam files into two separate files containing reads mapping either to the forward or reverse strand in order to generate strand-specific bigWig files.
+
 ## bed2gff.pl
 
 Used to annotate BED3 or BED4 file using annotatePeaks.pl from HOMER and convert it to a 9 column .gff file.
 
+## RNAseq_GFF_PairedEnd_RNA_Read_Count.pl
 
+Used to count number of reads over the bodies of genes specified in the .gff file generated with bed2gff.pl
 
+## RNAseq_DESeq2.R
+
+Used to perform differential gene expression analysis by incorporating spike-in based normalisation into DESeq2.
