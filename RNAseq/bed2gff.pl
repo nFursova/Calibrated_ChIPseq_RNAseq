@@ -3,7 +3,8 @@ use Getopt::Long;
 use Pod::Usage;
 use strict;
 
-pod2usage("\nAnnotates bed file with HOMER and converts to nine column GFF file. \nUsage: -bed <chr,start,stop> -genome <mm10, hg19>\n") if (($#ARGV<0) && (-t STDIN));
+pod2usage("\nAnnotates bed file with HOMER and converts to nine column GFF file. \nRequires HOMER annotatePeaks.pl in PATH. \nUsage: -bed <chr,start,stop> -genome <mm10, hg19>\n") if (($#ARGV<0) && (-t STDIN));
+
 
 &GetOptions ("bed=s"=> \my $bed_file,
              "genome=s"=> \my $genome,
