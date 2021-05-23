@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-# Adapted from the script originally written by Dr Michal Gdula
+# Adapted from the script originally written by Dr Michal Gdula from the Brockdorff lab, Department of Biochemistry, University of Oxford.
 
 require('GenomicRanges')
 require('Rsamtools')
