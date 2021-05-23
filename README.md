@@ -32,7 +32,7 @@ ChIPseq_Alignment_Pipeline_Summary.txt
 
 ## ChIPseq_PairedEnd_Bowtie2_SpikeIn_Alignment.pl
 
-Used to align paired-end ChIP-seq reads against the concatenated genome (spike-in plus the genome of interest) for one sample. Produces two separate sorted and indexed bam files for the experimental and spike-in genomes, with PCR duplicates removed.
+Used to align paired-end ChIP-seq reads against the concatenated genome (spike-in plus the genome of interest) for one sample. Produces two separate sorted and indexed bam files with uniquely mapped reads for the experimental and spike-in genomes, with PCR duplicates removed.
 
 ## ChIPseq_PairedEnd_Bowtie2_SpikeIn_AlignmentFromList.pl
 
@@ -58,7 +58,7 @@ Used to plot chromosome-wide read coverage calculated using the ChIPseq_Calculat
 
 ## RNAseq_PairedEnd_SpikeIn_Alignment.pl
 
-Used to align paired-end RNA-seq reads against the concatenated genome (spike-in plus the genome of interest) for one sample. Produces two separate sorted and indexed bam files for the experimental and spike-in genomes, with PCR duplicates removed.
+Used to align paired-end RNA-seq reads against the concatenated genome (spike-in plus the genome of interest) for one sample. Produces two separate sorted and indexed bam files with uniquely mapped reads for the experimental and spike-in genomes, with PCR duplicates removed.
 
 ## RNAseq_PairedEnd_SpikeIn_AlignmentFromList.pl
 
