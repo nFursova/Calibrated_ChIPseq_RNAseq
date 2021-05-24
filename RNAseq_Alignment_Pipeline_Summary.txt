@@ -61,7 +61,7 @@ RNAseq_PairedEnd_Split_Strand_Bigwig.pl -bam $file -genome mm10
 done
 
 ######For UCSC Track Hub upload, convert *REVERSE.bw to be displayed below the *FORWARD.bw by multiplying all values by -1
-######Download chrom.sizes.txt file from the UCSC Genome Browser-----------------------------------------------------
+######Download chrom.sizes.txt file from https://hgdownload-test.gi.ucsc.edu/goldenPath/$YOUR_GENOME_OF_INTEREST/bigZips/ 
 
 wiggletools write SampleName.MinusStrand.wig scale -1 SampleName.REVERSE.bw
 
@@ -84,13 +84,13 @@ nohup RNAseq_GFF_PairedEnd_RNA_Read_Count.pl -file ListFileForReadCount.txt -gff
 
 ######2a: Pre-normalise dm6 bam files to reflect the actual spike-in cell ratio (dm6/mm10 ratio in gDNA-seq Input) ----------
 
-ChIPseq_RNAseq_Subsample_BamFile_List_SpikeInInput.pl -file dm6.normalise.txt
+ChIPseq_RNAseq_Downsample_BamFile_FromList.pl -file dm6.normalise.txt
 
 ###### dm6.normalise.txt has two tab-separated columns: 
 ###### file.bam 	subsampling ratio ( < 1)
 
-######To obtain spike-in subsampling factors for dm6 bam files, for each sample calculate -------------------------------------
-######the dm6/mm10 ratio in the corresponding gDNA-seq Input file and then normalise to the lowest ratio ----------------------
+###### To obtain spike-in subsampling factors for dm6 bam files, for each sample calculate -------------------------------------
+###### dm6/mm10 ratio in the corresponding gDNA-seq Input file and then normalise to the lowest ratio ----------------------
 
 ######2b: Count reads from spike-in pre-normalised dm6 bam files for a set of dm6 refGene genes --------------------------------
 
