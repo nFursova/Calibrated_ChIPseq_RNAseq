@@ -87,3 +87,8 @@ Converts a 9 column .gff file into a tab-delimited table for the subsequent anal
 ## RNAseq_DESeq2.R
 
 Used to perform differential gene expression analysis, with spike-in based normalisation incorporated into a DESeq2 pipeline.
+
+## Running_DESeq2_analysis.R
+
+Used to call RNAseq_DESeq2.R script to run it for multiple cell lines.
+
