@@ -105,7 +105,7 @@ GFF2table.pl -gff ReadCounts.gff
 
 ######Run DESeq2 analysis scripts in R -----------------------------------------------------------------------------------------
 
-######DESeq2.RNAseq.Analysis.Example.Script.R that uses RNAseq_DESeq2.R
+######Running_DESeq2_analysis.R script calls RNAseq_DESeq2.R to run differential gene expression analysis for multiple cell lines.
 
 
 
