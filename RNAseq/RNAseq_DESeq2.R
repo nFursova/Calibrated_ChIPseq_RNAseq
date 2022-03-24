@@ -1,14 +1,14 @@
 ##Load required packages
 
-library("DESeq2")
-library("ggplot2")
+library('DESeq2')
+library('ggplot2')
+library('ggExtra')
 library('plyr')
 library('dplyr')
-require('ggplot2')
-require('reshape2')
-require('RColorBrewer')
-library('ggExtra')
+library('reshape2')
+library('RColorBrewer')
 library('purrr')
+
 
 ##DESeq2 function:
 
@@ -35,129 +35,125 @@ deseq_RNAseq=function(rnaseq_app, cell_line, cutoff){
   
   #############################################################
   
-  #Preparing spike-in counts table
+  ##Preparing dm6 (spike-in) count table
   
   print(paste0(cell_line, ' ', rnaseq_app, 'RNAseq dm6'))
   
-  dm6=read.table(file=paste0('data/dm6.refGene.GeneBody.Uniq.ANNOTATED.', rnaseq_app, 'RNAseq.txt'), sep='\t', header=T)
+  #Read in spike-in read count table from a set of unique dm6 refGene genes
   
-  dm6=dm6[,c("ID", paste0(cell_line, "_TAM_rep1"), paste0(cell_line, "_TAM_rep2"), paste0(cell_line, "_TAM_rep3"), 
-             paste0(cell_line, "_UNT_rep1"), paste0(cell_line, "_UNT_rep2"), paste0(cell_line, "_UNT_rep3"))]
+  dm6 <- read.table(file=paste0('data/dm6.refGene.GeneBody.Uniq.ANNOTATED.', rnaseq_app, 'RNAseq.csv'), sep='\t', header=T)
   
-  rownames(dm6) = make.names(c(as.character(dm6$ID)), unique=TRUE)
+  dm6 <- dm6[,c('ID', paste0(cell_line, '_TAM_rep1'), paste0(cell_line, '_TAM_rep2'), paste0(cell_line, '_TAM_rep3'), 
+             paste0(cell_line, '_UNT_rep1'), paste0(cell_line, '_UNT_rep2'), paste0(cell_line, '_UNT_rep3'))]
   
-  dm6=dm6[,2:ncol(dm6)]
+  rownames(dm6) <-  make.names(c(as.character(dm6$ID)), unique=TRUE)
   
-  dm6.Condition=c(rep('TAM',3), rep('UNT',3))
+  dm6 <- dm6[,2:ncol(dm6)]
   
-  dm6.Rep=rep(c('rep1', 'rep2', 'rep3'),2)
+  #Make a DESeq2 sample info table - make sure this matches the actual order of samples
   
-  dm6.SampleInfo=data.frame(condition= dm6.Condition, rep= dm6.Rep)
+  dm6.Condition <- c(rep('TAM',3), rep('UNT',3))
   
-  rownames(dm6.SampleInfo)<-colnames(dm6)
+  dm6.Rep <- rep(c('rep1', 'rep2', 'rep3'),2)
+  
+  dm6.SampleInfo <- data.frame(condition = dm6.Condition, rep = dm6.Rep)
+  
+  rownames(dm6.SampleInfo) <- colnames(dm6)
+  
+  dm6.SampleInfo$condition  <- factor(dm6.SampleInfo$condition, levels = c('UNT', 'TAM'))
   
   dm6.SampleInfo
   
-  ## Obtaining size factors from (prenormalised) dm6 count data in dm6 genes exons for normalisation of mm10 counts
+  ## Obtaining size factors from (prenormalised) dm6 count data for the subsequent normalisation of mm10 counts
   
-  dm6.DESEQ2 <- DESeqDataSetFromMatrix(countData=dm6, colData=dm6.SampleInfo, design = ~ rep + condition)
+  dm6.DESEQ2 <- DESeqDataSetFromMatrix(countData = dm6, colData = dm6.SampleInfo, design = ~ rep + condition)
   
-  cds_dm6=estimateSizeFactors(dm6.DESEQ2)
+  cds_dm6 <- estimateSizeFactors(dm6.DESEQ2)
   
-  size_Factors_dm6=sizeFactors(cds_dm6)
+  size_Factors_dm6 <- sizeFactors(cds_dm6)
   
-  write.table(size_Factors_dm6, paste0('results/SizeFactors/', cell_line , '.', rnaseq_app, 'RNAseq_Size_Factors_dm6_BE.txt'), quote=FALSE, col.names=FALSE)
+  write.table(size_Factors_dm6, paste0('results/SizeFactors/', cell_line , '.', rnaseq_app, 'RNAseq_Size_Factors_dm6.txt'), quote=FALSE, col.names=FALSE)
   
   ####################################################################################################################
   
-  ## preparing mm10 counts table and sample info table
+  ## Preparing mm10 (experimental) count table
   
   print(paste0(cell_line, ' ', rnaseq_app, 'RNAseq mm10'))
   
-  exp=read.table(paste0('data/mm10_NonRedundantRefGene_GeneBody.ANNOTATED.', rnaseq_app, 'RNAseq.txt'), sep='\t', header=T)
+  exp <- read.table(paste0('data/mm10_NonRedundantRefGene_GeneBody.ANNOTATED.', rnaseq_app, 'RNAseq.csv'), sep='\t', header=T)
   
-  exp=exp[,c("ID", paste0(cell_line, "_TAM_rep1"), paste0(cell_line, "_TAM_rep2"), paste0(cell_line, "_TAM_rep3"), 
-             paste0(cell_line, "_UNT_rep1"), paste0(cell_line, "_UNT_rep2"), paste0(cell_line, "_UNT_rep3"))]
+  exp <- exp[,c('ID', paste0(cell_line, '_TAM_rep1'), paste0(cell_line, '_TAM_rep2'), paste0(cell_line, '_TAM_rep3'), 
+             paste0(cell_line, '_UNT_rep1'), paste0(cell_line, '_UNT_rep2'), paste0(cell_line, '_UNT_rep3'))]
   
-  rownames(exp) = make.names(c(as.character(exp$ID)), unique=TRUE)
+  rownames(exp) <- make.names(c(as.character(exp$ID)), unique=TRUE)
   
-  exp=exp[,2:ncol(exp)]
+  ##Preparing mm10 sample info table
   
-  exp.Condition=c(rep('TAM',3), rep('UNT',3))
+  exp <- exp[,2:ncol(exp)]
   
-  exp.Rep=rep(c('rep1', 'rep2', 'rep3'), times=2)
+  exp.Condition <- c(rep('TAM',3), rep('UNT',3))
   
-  exp.SampleInfo=data.frame(condition=exp.Condition, rep = exp.Rep)
+  exp.Rep <- rep(c('rep1', 'rep2', 'rep3'), times=2)
   
-  rownames(exp.SampleInfo)<-colnames(exp)
+  exp.SampleInfo <- data.frame(condition=exp.Condition, rep = exp.Rep)
   
-  exp.SampleInfo$condition = factor(exp.SampleInfo$condition, levels = c('UNT', 'TAM'))
+  rownames(exp.SampleInfo) <- colnames(exp)
+  
+  exp.SampleInfo$condition  <- factor(exp.SampleInfo$condition, levels = c('UNT', 'TAM'))
   
   exp.SampleInfo
   
   #Performing Differential analysis
   
-  exp.DESEQ2 <- DESeqDataSetFromMatrix(countData=exp, colData=exp.SampleInfo, design = ~ rep + condition)
+  exp.DESEQ2 <- DESeqDataSetFromMatrix(countData=exp, colData=exp.SampleInfo, design = ~ rep + condition) #variable of interest (condition) has to be last in the design formula
   
   sizeFactors(exp.DESEQ2) <- size_Factors_dm6
   
-  exp.DESEQ2.analysis=DESeq(exp.DESEQ2)
+  exp.DESEQ2.analysis <- DESeq(exp.DESEQ2)
   
   
   ##################################################################################################
   
+  ##Principal component plot of the samples
   
-  # Data quality assessment by sample clustering and visualization
+  se <- SummarizedExperiment(log2(counts(exp.DESEQ2, normalized=TRUE) + 1),colData=colData(exp.DESEQ2))
   
-  ## Principal component plot of the samples
+  pcaData <- plotPCA(DESeqTransform(se), ntop=1000, intgroup=c('condition', 'rep'), returnData=TRUE)
+  percentVar <- round(100 * attr(pcaData, 'percentVar'))
   
-  se = SummarizedExperiment(log2(counts(exp.DESEQ2, normalized=TRUE) + 1),colData=colData(exp.DESEQ2))
-  
-  pcaData <- plotPCA(DESeqTransform(se), ntop=1000, intgroup=c("condition", "rep"), returnData=TRUE)
-  percentVar <- round(100 * attr(pcaData, "percentVar"))
-  
-  pdf(paste0("plots/PCAplots/", cell_line, '.', rnaseq_app, "RNAseq_dm6norm.PCA.pdf"))
+  pdf(paste0('plots/PCAplots/', cell_line, '.', rnaseq_app, 'RNAseq_dm6norm.PCA.pdf'))
   p=ggplot(pcaData, aes(PC1, PC2, color=condition, shape=rep)) +
     geom_point(size=3) +
-    xlab(paste0("PC1: ",percentVar[1],"% variance")) +
-    ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+    xlab(paste0('PC1: ',percentVar[1],'% variance')) +
+    ylab(paste0('PC2: ',percentVar[2],'% variance')) + 
     coord_fixed()
   print(p)
   dev.off()
   
   
-  ###################################################################################
+  ##############################################################################
   
-  # Extracting comparisons between conditions
+  ## Extracting comparisons between conditions
   
   #Compare TAM vs UNT
   
-  ###Non-nshrunk
+  ###Raw LFC
   
   exp.DESEQ2.results <- results(exp.DESEQ2.analysis, 
                                 contrast=c('condition','TAM','UNT'),
                                 alpha=0.05) 
   
-  ###Apeglm shrinking, using coefficient
+  ###Normal shrinking using contrast LFC -> for differential gene expression analysis of data with global transcriptional changes, apeglm type of shrinking was shown to over-normalize LFC towards LFC = 0
   
-  exp.DESEQ2.results.LFC = lfcShrink(exp.DESEQ2.analysis, 
-                                   coef = 'condition_TAM_vs_UNT', 
-                                   type = "apeglm")
-  
-  ###Normal shrinking using contrast
-  
-  exp.DESEQ2.results.LFC.normal = lfcShrink(exp.DESEQ2.analysis, 
-                                       contrast=c('condition','TAM','UNT'),
-                                       type = "normal")
+  exp.DESEQ2.results.LFC.normal <- lfcShrink(exp.DESEQ2.analysis, 
+                                            contrast=c('condition','TAM','UNT'),
+                                            type = 'normal')
   
   ###Add shrunk LFC to the results table
-  ###log2FoldChange - non-shrunk
-  ###LFC_apeglm - apeglm
-  ###LFC_normal - normal
-
-  exp.DESEQ2.results$LFC_apeglm = exp.DESEQ2.results.LFC$log2FoldChange
+  ###log2FoldChange - raw
+  ###LFC_normal - normal shrinking
   
-  exp.DESEQ2.results$LFC_normal = exp.DESEQ2.results.LFC.normal$log2FoldChange
+  exp.DESEQ2.results$LFC_normal <- exp.DESEQ2.results.LFC.normal$log2FoldChange
   
   #Preparing to save the results table
   
@@ -165,101 +161,56 @@ deseq_RNAseq=function(rnaseq_app, cell_line, cutoff){
   
   #Add ID column
   
-  exp.DESEQ2.results$ID=row.names(exp.DESEQ2.results)
+  exp.DESEQ2.results$ID <- row.names(exp.DESEQ2.results)
   
   #Annotate results table with counts
   
-  normalised.counts = as.data.frame(counts(exp.DESEQ2, normalized = TRUE))
+  normalised.counts <- as.data.frame(counts(exp.DESEQ2, normalized = TRUE))
   
-  normalised.counts$ID = row.names(normalised.counts)
+  normalised.counts$ID <- row.names(normalised.counts)
   
-  exp.DESEQ2.results.counts=merge(as.data.frame(exp.DESEQ2.results), 
+  exp.DESEQ2.results.counts <- merge(as.data.frame(exp.DESEQ2.results), 
                                   normalised.counts, 
                                   by = 'ID')
   
   Output.Table <- exp.DESEQ2.results.counts %>% 
     dplyr::select('ID', everything())
   
-  #Adding Gene name and coordinates information
+  #Adding Gene name and coordinates information and ordering the output table by padj
   
-  annotate=read.table(paste0('data/mm10_NonRedundantRefGene_GeneBody.ANNOTATED.', rnaseq_app, 'RNAseq.txt'), sep='\t', header=T)
+  annotate <- read.table(paste0('data/mm10_NonRedundantRefGene_GeneBody.ANNOTATED.', rnaseq_app, 'RNAseq.csv'), sep='\t', header=T)
   
   Output.Table <- merge(annotate[, c('Chr', 'Start', 'Stop', 
-                                    'Strand', 'ID', 'Size', 'Gene_name')], 
-                       Output.Table, by='ID' )
+                                     'Strand', 'ID', 'Size', 'Gene_name')], 
+                        Output.Table, by='ID' )
   
   Output.Table <- Output.Table[order(Output.Table$padj),]
   
-  #Annotate with RPKMs
-  
-  ###UNT
-  
   ##Calculate RPKMs, add +1 pseudocount
   
-  Output.Table[, c(paste0(cell_line, "_UNT_rep1_RPKM"))] <- (Output.Table[, c(paste0(cell_line, "_UNT_rep1"))]+1)/((Output.Table[, c("Size")])/1000)
-  Output.Table[, c(paste0(cell_line, "_UNT_rep2_RPKM"))] <- (Output.Table[, c(paste0(cell_line, "_UNT_rep2"))]+1)/((Output.Table[, c("Size")])/1000)
-  Output.Table[, c(paste0(cell_line, "_UNT_rep3_RPKM"))] <- (Output.Table[, c(paste0(cell_line, "_UNT_rep3"))]+1)/((Output.Table[, c("Size")])/1000)
+  reps <- colnames(select(Output.Table,contains('Rep')))
   
-  Output.Table[, c(paste0(cell_line, "_UNT_RPKM"))] <- (Output.Table[, c(paste0(cell_line, "_UNT_rep1_RPKM"))]+Output.Table[, c(paste0(cell_line, "_UNT_rep2_RPKM"))]+Output.Table[, c(paste0(cell_line, "_UNT_rep3_RPKM"))])/3
-  
-  ###TAM
-  
-  ##Calculate RPKMs, add +1 pseudocount
-  
-  Output.Table[, c(paste0(cell_line, "_TAM_rep1_RPKM"))] <- (Output.Table[, c(paste0(cell_line, "_TAM_rep1"))]+1)/((Output.Table[, c("Size")])/1000)
-  Output.Table[, c(paste0(cell_line, "_TAM_rep2_RPKM"))] <- (Output.Table[, c(paste0(cell_line, "_TAM_rep2"))]+1)/((Output.Table[, c("Size")])/1000)
-  Output.Table[, c(paste0(cell_line, "_TAM_rep3_RPKM"))] <- (Output.Table[, c(paste0(cell_line, "_TAM_rep3"))]+1)/((Output.Table[, c("Size")])/1000)
+  Output.Table[,paste0(reps, '_RPKM')] <- lapply(reps, function(x) (Output.Table[,x]+1) / (Output.Table[, 'Size']/1000))
   
   
-  Output.Table[, c(paste0(cell_line, "_TAM_RPKM"))] <- (Output.Table[, c(paste0(cell_line, "_TAM_rep1_RPKM"))]+Output.Table[, c(paste0(cell_line, "_TAM_rep2_RPKM"))]+Output.Table[, c(paste0(cell_line, "_TAM_rep3_RPKM"))])/3
+  ##Calculate mean RPKMs for conditions
+  
+   Output.Table[, c(paste0(cell_line, '_UNT_RPKM'))] <- rowMeans(Output.Table[, c(paste0(cell_line, '_UNT_rep1_RPKM'), paste0(cell_line, '_UNT_rep2_RPKM'), paste0(cell_line, '_UNT_rep3_RPKM'))])
+  
+  Output.Table[, c(paste0(cell_line, '_TAM_RPKM'))] <- rowMeans(Output.Table[, c(paste0(cell_line, '_TAM_rep1_RPKM'), paste0(cell_line, '_TAM_rep2_RPKM'), paste0(cell_line, '_TAM_rep3_RPKM'))])
   
   
-  ####Write the final table to a file
+  ####Save the final output table
   
-  write.table(as.data.frame(Output.Table),file=paste0('results/DESeq2OutputTables/', cell_line, '.', rnaseq_app, "RNAseq_spikenormalised_DESeq2.txt"), quote=FALSE, row.names=FALSE, sep = '\t')
+  write.table(as.data.frame(Output.Table),file=paste0('results/DESeq2OutputTables/', cell_line, '.', rnaseq_app, 'RNAseq_spikenormalised_DESeq2.txt'), quote=FALSE, row.names=FALSE, sep = '\t')
   
   #######################################
   
-  print('Saving data')
+  print('Saving results')
   
-  ###Extract IDs, Gene names and GeneBody coordinates of differentially expressed genes
+  ###Extract IDs, Gene names and GeneBody coordinates for differentially expressed genes
   
-  ###APEGLM LFC
-  
-  UP <- Output.Table[which(Output.Table$padj<0.05 & Output.Table$LFC_apeglm > log2(cutoff)),]
-  
-  DOWN <- Output.Table[which(Output.Table$padj<0.05 & Output.Table$LFC_apeglm < -log2(cutoff)),]
-  
-  NonSign <- Output.Table[(which(!((Output.Table$ID %in% UP$ID) | (Output.Table$ID %in% DOWN$ID)))),]
-  
-  ####Output gene body coordinates for genes with different changes in expression
-  
-  write.table(as.data.frame(UP[, c('Chr', 'Start', 'Stop', 'ID', 'ID', 'Strand')]),file=paste0('results/DiffGeneBodyCoordinates/', cell_line, "_", rnaseq_app, "RNAseq.DESeq2.UP.LFC_apeglm.", cutoff, ".bed"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
-  
-  write.table(as.data.frame(DOWN[, c('Chr', 'Start', 'Stop', 'ID', 'ID', 'Strand')]),file=paste0('results/DiffGeneBodyCoordinates/', cell_line, "_", rnaseq_app, "RNAseq.DESeq2.DOWN.LFC_apeglm.", cutoff, ".bed"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
-  
-  write.table(as.data.frame(NonSign[, c('Chr', 'Start', 'Stop', 'ID', 'ID', 'Strand')]),file=paste0('results/DiffGeneBodyCoordinates/', cell_line, "_", rnaseq_app, "RNAseq.DESeq2.NonSign.LFC_apeglm.", cutoff, ".bed"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
-  
-  #####Output Gene IDs for genes with different changes
-  
-  write.table(as.data.frame(UP[, c('ID')]),file=paste0('results/DiffRefSeqID/', cell_line, "_", rnaseq_app, "RNAseq.UP.LFC_apeglm.", cutoff, ".txt"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
-  
-  write.table(as.data.frame(DOWN[, c('ID')]),file=paste0('results/DiffRefSeqID/', cell_line, "_", rnaseq_app, "RNAseq.DOWN.LFC_apeglm.", cutoff, ".txt"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
-  
-  write.table(as.data.frame(NonSign[, c('ID')]),file=paste0('results/DiffRefSeqID/', cell_line, "_", rnaseq_app, "RNAseq.NonSign.LFC_apeglm.", cutoff, ".txt"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
-  
-  
-  #####Output Gene Name for genes with different changes
-  
-  write.table(as.data.frame(UP[, c('Gene_name')]),file=paste0('results/DiffRefSeqID/', cell_line, "_", rnaseq_app, "RNAseq.Gene_name.UP.LFC_apeglm.", cutoff, ".txt"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
-  
-  write.table(as.data.frame(DOWN[, c('Gene_name')]),file=paste0('results/DiffRefSeqID/', cell_line, "_", rnaseq_app, "RNAseq.Gene_name.DOWN.LFC_apeglm.", cutoff, ".txt"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
-  
-  write.table(as.data.frame(NonSign[, c('Gene_name')]),file=paste0('results/DiffRefSeqID/', cell_line, "_", rnaseq_app, "RNAseq.Gene_name.NonSign.LFC_apeglm.", cutoff, ".txt"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
-  
-  ####################################################################################
-  
-  ###normal LFC
+  ###Use normal-shrunk LFC and p-adj for calling significant gene expression changes
   
   UP.normal <- Output.Table[which(Output.Table$padj<0.05 & Output.Table$LFC_normal > log2(cutoff)),]
   
@@ -268,30 +219,30 @@ deseq_RNAseq=function(rnaseq_app, cell_line, cutoff){
   NonSign.normal <- Output.Table[which(!(Output.Table$ID %in% UP.normal$ID | Output.Table$ID %in% DOWN.normal$ID)),]
   
   
-  ####Output gene body coordinates for genes with different changes in expression
+  ####Output gene body coordinates for DEGs
   
-  write.table(as.data.frame(UP.normal[, c('Chr', 'Start', 'Stop', 'ID', 'ID', 'Strand')]),file=paste0('results/DiffGeneBodyCoordinates/', cell_line, "_", rnaseq_app, "RNAseq.DESeq2.UP.LFC_normal.", cutoff, ".bed"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
+  write.table(as.data.frame(UP.normal[, c('Chr', 'Start', 'Stop', 'ID', 'ID', 'Strand')]),file=paste0('results/DiffGeneBodyCoordinates/', cell_line, '_', rnaseq_app, 'RNAseq.DESeq2.UP.LFC_normal.', cutoff, '.bed'), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
   
-  write.table(as.data.frame(DOWN.normal[, c('Chr', 'Start', 'Stop', 'ID', 'ID', 'Strand')]),file=paste0('results/DiffGeneBodyCoordinates/', cell_line, "_", rnaseq_app, "RNAseq.DESeq2.DOWN.LFC_normal.", cutoff, ".bed"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
+  write.table(as.data.frame(DOWN.normal[, c('Chr', 'Start', 'Stop', 'ID', 'ID', 'Strand')]),file=paste0('results/DiffGeneBodyCoordinates/', cell_line, '_', rnaseq_app, 'RNAseq.DESeq2.DOWN.LFC_normal.', cutoff, '.bed'), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
   
-  write.table(as.data.frame(NonSign.normal[, c('Chr', 'Start', 'Stop', 'ID', 'ID', 'Strand')]),file=paste0('results/DiffGeneBodyCoordinates/', cell_line, "_", rnaseq_app, "RNAseq.DESeq2.NonSign.LFC_normal.", cutoff, ".bed"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
+  write.table(as.data.frame(NonSign.normal[, c('Chr', 'Start', 'Stop', 'ID', 'ID', 'Strand')]),file=paste0('results/DiffGeneBodyCoordinates/', cell_line, '_', rnaseq_app, 'RNAseq.DESeq2.NonSign.LFC_normal.', cutoff, '.bed'), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
   
-  #####Output Gene IDs for genes with different changes
+  #####Output Gene IDs for DEGs
   
-  write.table(as.data.frame(UP.normal[, c('ID')]),file=paste0('results/DiffRefSeqID/', cell_line, "_", rnaseq_app, "RNAseq.UP.LFC_normal.", cutoff, ".txt"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
+  write.table(as.data.frame(UP.normal[, c('ID')]),file=paste0('results/DiffRefSeqID/', cell_line, '_', rnaseq_app, 'RNAseq.UP.LFC_normal.', cutoff, '.txt'), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
   
-  write.table(as.data.frame(DOWN.normal[, c('ID')]),file=paste0('results/DiffRefSeqID/', cell_line, "_", rnaseq_app, "RNAseq.DOWN.LFC_normal.", cutoff, ".txt"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
+  write.table(as.data.frame(DOWN.normal[, c('ID')]),file=paste0('results/DiffRefSeqID/', cell_line, '_', rnaseq_app, 'RNAseq.DOWN.LFC_normal.', cutoff, '.txt'), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
   
-  write.table(as.data.frame(NonSign.normal[, c('ID')]),file=paste0('results/DiffRefSeqID/', cell_line, "_", rnaseq_app, "RNAseq.NonSign.LFC_normal.", cutoff, ".txt"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
+  write.table(as.data.frame(NonSign.normal[, c('ID')]),file=paste0('results/DiffRefSeqID/', cell_line, '_', rnaseq_app, 'RNAseq.NonSign.LFC_normal.', cutoff, '.txt'), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
   
   
-  #####Output Gene Name for genes with different changes
+  #####Output Gene Named for DEGs
   
-  write.table(as.data.frame(UP.normal[, c('Gene_name')]),file=paste0('results/DiffRefSeqID/', cell_line, "_", rnaseq_app, "RNAseq.Gene_name.UP.LFC_normal.", cutoff, ".txt"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
+  write.table(as.data.frame(UP.normal[, c('Gene_name')]),file=paste0('results/DiffRefSeqID/', cell_line, '_', rnaseq_app, 'RNAseq.Gene_name.UP.LFC_normal.', cutoff, '.txt'), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
   
-  write.table(as.data.frame(DOWN.normal[, c('Gene_name')]),file=paste0('results/DiffRefSeqID/', cell_line, "_", rnaseq_app, "RNAseq.Gene_name.DOWN.LFC_normal.", cutoff, ".txt"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
+  write.table(as.data.frame(DOWN.normal[, c('Gene_name')]),file=paste0('results/DiffRefSeqID/', cell_line, '_', rnaseq_app, 'RNAseq.Gene_name.DOWN.LFC_normal.', cutoff, '.txt'), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
   
-  write.table(as.data.frame(NonSign.normal[, c('Gene_name')]),file=paste0('results/DiffRefSeqID/', cell_line, "_", rnaseq_app, "RNAseq.Gene_name.NonSign.LFC_normal.", cutoff, ".txt"), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
+  write.table(as.data.frame(NonSign.normal[, c('Gene_name')]),file=paste0('results/DiffRefSeqID/', cell_line, '_', rnaseq_app, 'RNAseq.Gene_name.NonSign.LFC_normal.', cutoff, '.txt'), quote=FALSE, row.names=FALSE, col.names=FALSE, sep = '\t')
   
   
   ###Plot MA plots and Vulcano Plots
@@ -300,44 +251,15 @@ deseq_RNAseq=function(rnaseq_app, cell_line, cutoff){
   
   ###MA plots
   
-  ###APEGLM LFC
-  
-  Output.Table[, paste0(cell_line, '_UNT_RPKM_log2')] = log2(Output.Table[, paste0(cell_line, '_UNT_RPKM')])
-  
-  pdf(paste0('plots/MAplots/',cell_line, "_", rnaseq_app, 'RNAseq_density_scatterplot.apeglm.LFC', cutoff, '.pdf'))
-  
-  p=ggplot(data=Output.Table,aes_string(paste0(cell_line, '_UNT_RPKM_log2'),'LFC_apeglm'))+
-    theme_bw()+
-    theme(aspect.ratio = 1, axis.ticks = element_line(colour = "black", size = 2), 
-          axis.text.x = element_text(colour = 'black',size=20), 
-          axis.text.y = element_text(colour = 'black', size=20), 
-          axis.title.x=element_text(colour = 'black', size=20), 
-          axis.title.y=element_text(colour = 'black', size=20), 
-          plot.title = element_text(colour = 'black', size=15,hjust = 0.5), 
-          legend.title=element_blank(),legend.position=c(0.85,0.2),
-          legend.key = element_blank(), panel.grid.major=element_blank(),
-          panel.grid.minor=element_blank(), 
-          panel.border = element_rect(colour = 'black', size = 2))+
-    geom_point(colour="gray57",alpha=0.35,size=1.75, pch=16)+
-    geom_point(data=Output.Table[which(Output.Table$padj<0.05 & abs(Output.Table$LFC_apeglm) > log2(cutoff)),],colour="red",alpha=0.35,size=1.75, pch=16)+
-    scale_y_continuous(limits=c(-6,7),breaks = seq(-6,7, by = 1))+
-    scale_x_continuous(limits=c(-12,16), breaks = seq(-12,16, by = 2))+
-    xlab("Log2 RPKM UNT")+
-    ylab("Log2 Fold Change")+
-    ggtitle(paste0(cell_line, ' ', rnaseq_app, '\n', 'UP=', nrow(UP), ' DOWN=', nrow(DOWN)))+
-    geom_hline(yintercept=0,linetype="dashed",lwd=2)+
-    theme(legend.position="none")
-  print(ggMarginal(p, type="density", margins='y', col='black', size=6, lwd=1.5, fill='gray57'))
-  
-  dev.off()
-  
   ####normal LFC
   
-  pdf(paste0('plots/MAplots/',cell_line, "_", rnaseq_app, 'RNAseq_density_scatterplot.normal.LFC', cutoff, '.pdf'))
+  Output.Table[, paste0(cell_line, '_UNT_RPKM_log2')] <- log2(Output.Table[, paste0(cell_line, '_UNT_RPKM')])
+  
+  pdf(paste0('plots/MAplots/',cell_line, '_', rnaseq_app, 'RNAseq_density_scatterplot.normal.LFC', cutoff, '.pdf'))
   
   p=ggplot(data=Output.Table,aes_string(paste0(cell_line, '_UNT_RPKM_log2'),'LFC_normal'))+
     theme_bw()+
-    theme(aspect.ratio = 1, axis.ticks = element_line(colour = "black", size = 2), 
+    theme(aspect.ratio = 1, axis.ticks = element_line(colour = 'black', size = 2), 
           axis.text.x = element_text(colour = 'black',size=20), 
           axis.text.y = element_text(colour = 'black', size=20), 
           axis.title.x=element_text(colour = 'black', size=20), 
@@ -347,61 +269,29 @@ deseq_RNAseq=function(rnaseq_app, cell_line, cutoff){
           legend.key = element_blank(),panel.grid.major=element_blank(),
           panel.grid.minor=element_blank(), 
           panel.border = element_rect(colour = 'black', size = 2))+
-    geom_point(colour="gray57",alpha=0.35,size=1.75, pch=16)+
-    geom_point(data=Output.Table[which(Output.Table$padj<0.05 & abs(Output.Table$LFC_normal) > log2(cutoff)),],colour="red",alpha=0.35,size=1.75, pch=16)+
+    geom_point(colour='gray57',alpha=0.35,size=1.75, pch=16)+
+    geom_point(data=Output.Table[which(Output.Table$padj<0.05 & abs(Output.Table$LFC_normal) > log2(cutoff)),],colour='red',alpha=0.35,size=1.75, pch=16)+
     scale_y_continuous(limits=c(-5,6),breaks = seq(-5,6, by = 1))+
     scale_x_continuous(limits=c(-12,16), breaks = seq(-12,16, by = 2))+
-    xlab("Log2 RPKM UNT")+
-    ylab("Log2 Fold Change")+
+    xlab('Log2 RPKM UNT')+
+    ylab('Log2 Fold Change')+
     ggtitle(paste0(cell_line, ' ', rnaseq_app, '\n', 'UP=', nrow(UP.normal), ' DOWN=', nrow(DOWN.normal)))+
-    geom_hline(yintercept=0,linetype="dashed",lwd=2)+
-    theme(legend.position="none")
-  print(ggMarginal(p, type="density", margins='y', col='black', size=6, lwd=1.5, fill='gray57'))
+    geom_hline(yintercept=0,linetype='dashed',lwd=2)+
+    theme(legend.position='none')
+  print(ggMarginal(p, type='density', margins='y', col='black', size=6, lwd=1.5, fill='gray57'))
   
   dev.off()
   
   
-  ###Vulcano plots
+  ###Volcano plots
   
   Output.Table$log10_padj = -log10(Output.Table$padj)
   
-  
-  ###APEGLM LFC
-  
-  pdf(paste0('plots/VulcanoPlots/', cell_line, "_", rnaseq_app, 'RNAseq_vulcano_scatterplot.apeglm.LFC', cutoff, '.pdf'))
-  
-  p=ggplot(data=Output.Table,aes(LFC_apeglm,log10_padj))+
-    theme_bw()+
-    theme(aspect.ratio = 1, axis.ticks = element_line(colour = "black", size = 2), 
-          axis.text.x = element_text(colour = 'black',size=20), 
-          axis.text.y = element_text(colour = 'black', size=20), 
-          axis.title.x=element_text(colour = 'black', size=20), 
-          axis.title.y=element_text(colour = 'black', size=20), 
-          plot.title = element_text(colour = 'black', size=15,hjust = 0.5), 
-          legend.title=element_blank(),legend.position=c(0.85,0.2),
-          legend.key = element_blank(),panel.grid.major=element_blank(),
-          panel.grid.minor=element_blank(), 
-          panel.border = element_rect(colour = 'black', size = 2))+
-    geom_point(colour="gray57",alpha=0.4,size=1.5,pch=16)+
-    geom_point(data=Output.Table[which(Output.Table$padj<0.05 & abs(Output.Table$LFC_apeglm)>log2(cutoff)),],colour="red",alpha=0.5,size=1.5,pch=16)+
-    scale_x_continuous(limits=c(-6,7), breaks = seq(-6,7, by = 2))+
-    xlab("Log2 Fold Change")+ylab("-log10 p-adj")+
-    ggtitle(paste0(cell_line, ' ', rnaseq_app, '\n', 'UP=', nrow(UP), ' DOWN=', nrow(DOWN)))+
-    geom_vline(xintercept=0,linetype="dashed",lwd=2)+
-    theme(legend.position="none")
-  print(p)
-  
-  dev.off()
-  
-  
-  ####normal LFC
-  
-  
-  pdf(paste0('plots/VulcanoPlots/', cell_line, "_", rnaseq_app, 'RNAseq_vulcano_scatterplot.normal.LFC', cutoff, '.pdf'))
+  pdf(paste0('plots/VolcanoPlots/', cell_line, '_', rnaseq_app, 'RNAseq_volcano_scatterplot.normal.LFC', cutoff, '.pdf'))
   
   p=ggplot(data=Output.Table,aes(LFC_normal,log10_padj))+
     theme_bw()+
-    theme(aspect.ratio = 1, axis.ticks = element_line(colour = "black", size = 2), 
+    theme(aspect.ratio = 1, axis.ticks = element_line(colour = 'black', size = 2), 
           axis.text.x = element_text(colour = 'black',size=20), 
           axis.text.y = element_text(colour = 'black', size=20), 
           axis.title.x=element_text(colour = 'black', size=20), 
@@ -411,14 +301,14 @@ deseq_RNAseq=function(rnaseq_app, cell_line, cutoff){
           legend.key = element_blank(),panel.grid.major=element_blank(),
           panel.grid.minor=element_blank(), 
           panel.border = element_rect(colour = 'black', size = 2))+
-    geom_point(colour="gray57",alpha=0.4,size=1.5,pch=16)+
-    geom_point(data=Output.Table[which(Output.Table$padj<0.05 & abs(Output.Table$LFC_normal)>log2(cutoff)),],colour="red",alpha=0.5,size=1.5,pch=16)+
+    geom_point(colour='gray57',alpha=0.4,size=1.5,pch=16)+
+    geom_point(data=Output.Table[which(Output.Table$padj<0.05 & abs(Output.Table$LFC_normal)>log2(cutoff)),],colour='red',alpha=0.5,size=1.5,pch=16)+
     scale_x_continuous(limits=c(-5,6), breaks = seq(-5,6, by = 2))+
-    xlab("Log2 Fold Change")+
-    ylab("-log10 p-adj")+
+    xlab('Log2 Fold Change')+
+    ylab('-log10 p-adj')+
     ggtitle(paste0(cell_line, ' ', rnaseq_app, '\n', 'UP=', nrow(UP.normal), ' DOWN=', nrow(DOWN.normal)))+
-    geom_vline(xintercept=0,linetype="dashed",lwd=2)+
-    theme(legend.position="none")
+    geom_vline(xintercept=0,linetype='dashed',lwd=2)+
+    theme(legend.position='none')
   print(p)
   
   dev.off()
@@ -427,6 +317,7 @@ deseq_RNAseq=function(rnaseq_app, cell_line, cutoff){
 
 
 mapply(FUN = deseq_RNAseq, rnaseq_app = rnaseq_app, cell_line = cell_line, cutoff = cutoff)
+
 
 
 
