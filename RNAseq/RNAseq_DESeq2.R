@@ -26,9 +26,9 @@ deseq_RNAseq=function(rnaseq_app, cell_line, cutoff){
   
   #######Print initialising parametres:
   
-  print(paste0('Run DESeq2 on data/dm6.refGene.GeneBody.Uniq.ANNOTATED.', rnaseq_app, 'RNAseq.txt file'))
+  print(paste0('Run DESeq2 on data/dm6.refGene.GeneBody.Uniq.ANNOTATED.', rnaseq_app, 'RNAseq.csv file'))
   
-  print(paste0('Run DESeq2 on data/mm10_NonRedundantRefGene_GeneBody.ANNOTATED.', rnaseq_app, 'RNAseq.txt file'))
+  print(paste0('Run DESeq2 on data/mm10_NonRedundantRefGene_GeneBody.ANNOTATED.', rnaseq_app, 'RNAseq.csv file'))
   
   print(paste0('Run DESeq2 for ', cell_line, ' cell line'))
   
@@ -285,7 +285,7 @@ deseq_RNAseq=function(rnaseq_app, cell_line, cutoff){
   
   ###Volcano plots
   
-  Output.Table$log10_padj = -log10(Output.Table$padj)
+  Output.Table$log10_padj  <- -log10(Output.Table$padj)
   
   pdf(paste0('plots/VolcanoPlots/', cell_line, '_', rnaseq_app, 'RNAseq_volcano_scatterplot.normal.LFC', cutoff, '.pdf'))
   
@@ -317,7 +317,4 @@ deseq_RNAseq=function(rnaseq_app, cell_line, cutoff){
 
 
 mapply(FUN = deseq_RNAseq, rnaseq_app = rnaseq_app, cell_line = cell_line, cutoff = cutoff)
-
-
-
-
+                                                 
